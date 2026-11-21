@@ -1,0 +1,16 @@
+Test ID,Area,Check,Expected,Actual,Result,Method/Source,Date
+TC01,SQL data quality,Row count after load and after cleaning,7043 both,7043 both,PASS,Excel workbook Validation_Log (independent CSV import); re-verified from both CSVs 20 Nov,17 Nov 2026
+TC02,SQL data quality,Duplicate customer IDs in cleaned table,0,0,PASS,Excel workbook Data_Quality (COUNTIF groups); re-verified from CSV 20 Nov,17 Nov 2026
+TC03,SQL data quality,NULLs in key columns and Churn domain,0 NULLs; Yes/No only,0 NULLs; Yes/No only,PASS,Excel workbook Data_Quality; re-verified from CSV 20 Nov,17 Nov 2026
+TC04,SQL data quality,Tenure band boundaries,band min/max within band limits,all bands consistent (0 mismatches),PASS,Independent per-row band recheck from CSV 20 Nov,20 Nov 2026
+TC05,SQL data quality,MonthlyCharges within dataset range,18.25-118.75,18.25-118.75,PASS,Excel workbook Data_Quality min/max; re-verified from CSV 20 Nov,17 Nov 2026
+TC06,Excel reconciliation,8 core metrics SQL vs independent Excel,all equal,all equal (difference 0),PASS,Excel workbook Validation_Log saved PASS values,17 Nov 2026
+TC07,Excel data quality,14 worksheet quality checks,all PASS,all PASS,PASS,Excel workbook Data_Quality saved PASS values,17 Nov 2026
+TC08,Power BI,KPI cards vs SQL,7043 / 26.54% / 139130.85 / 64.76,match,PASS,On-laptop check with photo evidence,18 Nov 2026
+TC09,Power BI,Zero-churn segments show 0 not blank,0.00% / $0.00,0.00% / $0.00,PASS,On-laptop check with photo evidence,18 Nov 2026
+TC10,Power BI,Slicer interaction updates numbers,updates correctly,updates correctly,PASS,On-laptop check with photo evidence,18 Nov 2026
+TC11,Power BI,Refresh from re-exported CSV keeps numbers correct,numbers unchanged after refresh,pending,NOT RUN,Planned: Home > Refresh in Power BI Desktop,-
+TC12,Power BI,Payment-method chart values vs SQL,45.29 / 19.11 / 16.71 / 15.24,pending,NOT RUN,Planned: read chart against SQL output,-
+TC13,Power BI,Slicer sweep both pages,all slicers update correctly,pending,NOT RUN,Planned: each slicer on both pages,-
+TC14,Analysis figures,Payment-method breakdown (counts and churn %),2365/45.29; 1612/19.11; 1544/16.71; 1522/15.24,match,PASS,Independent SQLite re-run of 03_analysis Q6 against verified clean CSV (not a fresh MySQL run),20 Nov 2026
+TC15,Analysis figures,Monthly charge band breakdown,1731/10.86; 1721/23.65; 2683/37.91; 908/28.30,match,PASS,Independent SQLite re-run of 03_analysis Q7 against verified clean CSV (not a fresh MySQL run),20 Nov 2026

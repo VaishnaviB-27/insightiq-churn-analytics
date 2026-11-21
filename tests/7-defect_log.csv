@@ -1,0 +1,2 @@
+Defect ID,Found in,Description,Expected,Actual,Severity,Status
+D01,Power BI Churn Drivers matrix,Segments with customers but zero churn showed blank instead of 0,0.00% / $0.00 shown,blank cells,Medium,Fixed 18 Nov 2026 - measures updated; re-verified on laptop
