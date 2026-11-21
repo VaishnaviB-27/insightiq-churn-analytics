@@ -1,0 +1,188 @@
+table customers_clean
+
+	column customerID
+		dataType: string
+		sourceColumn: customerID
+		summarizeBy: none
+
+	column gender
+		dataType: string
+		sourceColumn: gender
+		summarizeBy: none
+
+	column SeniorCitizen
+		dataType: int64
+		sourceColumn: SeniorCitizen
+		summarizeBy: none
+
+	column Partner
+		dataType: string
+		sourceColumn: Partner
+		summarizeBy: none
+
+	column Dependents
+		dataType: string
+		sourceColumn: Dependents
+		summarizeBy: none
+
+	column tenure
+		dataType: int64
+		sourceColumn: tenure
+		summarizeBy: none
+
+	column PhoneService
+		dataType: string
+		sourceColumn: PhoneService
+		summarizeBy: none
+
+	column MultipleLines
+		dataType: string
+		sourceColumn: MultipleLines
+		summarizeBy: none
+
+	column InternetService
+		dataType: string
+		sourceColumn: InternetService
+		summarizeBy: none
+
+	column OnlineSecurity
+		dataType: string
+		sourceColumn: OnlineSecurity
+		summarizeBy: none
+
+	column OnlineBackup
+		dataType: string
+		sourceColumn: OnlineBackup
+		summarizeBy: none
+
+	column DeviceProtection
+		dataType: string
+		sourceColumn: DeviceProtection
+		summarizeBy: none
+
+	column TechSupport
+		dataType: string
+		sourceColumn: TechSupport
+		summarizeBy: none
+
+	column StreamingTV
+		dataType: string
+		sourceColumn: StreamingTV
+		summarizeBy: none
+
+	column StreamingMovies
+		dataType: string
+		sourceColumn: StreamingMovies
+		summarizeBy: none
+
+	column Contract
+		dataType: string
+		sourceColumn: Contract
+		summarizeBy: none
+
+	column PaperlessBilling
+		dataType: string
+		sourceColumn: PaperlessBilling
+		summarizeBy: none
+
+	column PaymentMethod
+		dataType: string
+		sourceColumn: PaymentMethod
+		summarizeBy: none
+
+	column MonthlyCharges
+		dataType: double
+		sourceColumn: MonthlyCharges
+		summarizeBy: none
+
+	column TotalCharges
+		dataType: double
+		sourceColumn: TotalCharges
+		summarizeBy: none
+
+	column Churn
+		dataType: string
+		sourceColumn: Churn
+		summarizeBy: none
+
+	column tenure_band
+		dataType: string
+		sourceColumn: tenure_band
+		sortByColumn: tenure_band_order
+		summarizeBy: none
+
+	column tenure_band_order
+		dataType: int64
+		sourceColumn: tenure_band_order
+		summarizeBy: none
+
+	/// Counts every loaded customer row. Validation - must read 7,043.
+	measure 'Total Customers' = COUNTROWS ( customers_clean )
+		formatString: #,##0
+
+	/// Customers whose Churn flag is Yes. Validation - 1,869. Shows 0 when a segment has customers but no churn; blank only when the segment has no customers.
+	measure 'Churned Customers' = IF ( [Total Customers] > 0, COALESCE ( CALCULATE ( COUNTROWS ( customers_clean ), customers_clean[Churn] = "Yes" ), 0 ), BLANK () )
+		formatString: #,##0
+
+	/// Share of customers who churned. Validation - 26.54%.
+	measure 'Churn %' = DIVIDE ( [Churned Customers], [Total Customers] )
+		formatString: 0.00%
+
+	/// Current monthly charges of customers who already churned. Descriptive, not predicted future loss. Validation - $139,130.85. Shows $0.00 when a segment has customers but no churn; blank only when the segment has no customers.
+	measure 'Monthly Charges of Churned Customers' = IF ( [Total Customers] > 0, COALESCE ( CALCULATE ( SUM ( customers_clean[MonthlyCharges] ), customers_clean[Churn] = "Yes" ), 0 ), BLANK () )
+		formatString: $#,##0.00
+
+	/// Average monthly charge across all customers. Validation - $64.76.
+	measure 'Avg Monthly Charge' = AVERAGE ( customers_clean[MonthlyCharges] )
+		formatString: $#,##0.00
+
+	/// Customers with no recorded TotalCharges. Validation - must read exactly 11; keep as missing, never zero.
+	measure 'Missing Total Charges' = COUNTBLANK ( customers_clean[TotalCharges] )
+		formatString: #,##0
+
+	partition customers_clean = m
+		mode: import
+		source =
+			let
+				Loaded =
+					if CsvPath = null or Text.Trim(CsvPath) = "" then
+						#table(
+							type table [customerID = text, gender = text, SeniorCitizen = Int64.Type, Partner = text, Dependents = text, tenure = Int64.Type, PhoneService = text, MultipleLines = text, InternetService = text, OnlineSecurity = text, OnlineBackup = text, DeviceProtection = text, TechSupport = text, StreamingTV = text, StreamingMovies = text, Contract = text, PaperlessBilling = text, PaymentMethod = text, MonthlyCharges = number, TotalCharges = number, Churn = text, tenure_band = text, tenure_band_order = Int64.Type],
+							{}
+						)
+					else
+						let
+							Source = Csv.Document(File.Contents(CsvPath), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+							Promote = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+							Normalize = Table.ReplaceValue(Promote, "NULL", null, Replacer.ReplaceValue, {"TotalCharges"}),
+							Typed = Table.TransformColumnTypes(Normalize, {
+								{"customerID", type text},
+								{"gender", type text},
+								{"SeniorCitizen", Int64.Type},
+								{"Partner", type text},
+								{"Dependents", type text},
+								{"tenure", Int64.Type},
+								{"PhoneService", type text},
+								{"MultipleLines", type text},
+								{"InternetService", type text},
+								{"OnlineSecurity", type text},
+								{"OnlineBackup", type text},
+								{"DeviceProtection", type text},
+								{"TechSupport", type text},
+								{"StreamingTV", type text},
+								{"StreamingMovies", type text},
+								{"Contract", type text},
+								{"PaperlessBilling", type text},
+								{"PaymentMethod", type text},
+								{"MonthlyCharges", type number},
+								{"TotalCharges", type number},
+								{"Churn", type text},
+								{"tenure_band", type text},
+								{"tenure_band_order", Int64.Type}
+							})
+						in
+							Typed
+			in
+				Loaded
+
+	annotation PBI_ResultType = Table
