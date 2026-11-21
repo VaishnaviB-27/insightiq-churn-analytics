@@ -1,0 +1,11 @@
+# Power BI PBIP local cache and settings (never commit)
+powerbi/InsightIQ/.pbi/
+powerbi/InsightIQ/**/*.pbi/cache.json
+powerbi/InsightIQ/**/localSettings.json
+
+# Data files (kept out of the repo - see data/README.md)
+*.csv
+
+# OS noise
+Thumbs.db
+.DS_Store
