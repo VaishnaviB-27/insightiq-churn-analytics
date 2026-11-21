@@ -1,0 +1,5 @@
+database InsightIQ
+	id: 63c2c976-dfc6-49b4-8473-9848f3101965
+	compatibilityLevel: 1702
+	compatibilityMode: powerBI
+	language: 1033
